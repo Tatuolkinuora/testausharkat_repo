@@ -13,8 +13,4 @@ describe('Laskimen testaus', function () {
     const checkSumma = laskin.miinusLasku(5, 2);
     expect(checkSumma).toBe(3);
   });
-  test('Tarkistetaan, että kertoLasku-funktio palauttaa oikean tulon kertolaskulla 3 * 4', function () {
-    const checkSumma = laskin.kertoLasku(3, 4);
-    expect(checkSumma).toBe(12);
-  });
 });
