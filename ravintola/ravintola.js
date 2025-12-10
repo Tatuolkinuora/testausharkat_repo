@@ -4,20 +4,36 @@ OHJELMAKOODI
 */
 
 const Ravintola = function () {
-  this.alkuruoat = ['Tomaattikeitto', 'Leipä', 'Vihersalaatti', 'Salsa'];
-  this.paaruoat = [
-    'Kalakeitto',
-    'Makaroonilaatikko',
-    'Kasvispihvi',
-    'Kanasalaatti',
+  this.alkuruoat = [
+    { ruoka: 'Tomaattikeitto', hinta: 5 },
+    { ruoka: 'Leipä', hinta: 3 },
+    { ruoka: 'Vihersalaatti', hinta: 4 },
+    { ruoka: 'Salsa', hinta: 4 },
   ];
-  this.jalkiruoat = ['Hedelmäsalaatti', 'Jäätelö', 'Pulla', 'Donitsi'];
-  this.juomat = ['Tee', 'Kahvi', 'Maito', 'Mehu'];
+  this.paaruoat = [
+    { ruoka: 'Kalakeitto', hinta: 8 },
+    { ruoka: 'Makaroonilaatikko', hinta: 6 },
+    { ruoka: 'Kasvispihvi', hinta: 7 },
+    { ruoka: 'Kanasalaatti', hinta: 9 },
+  ];
+  this.jalkiruoat = [
+    { ruoka: 'Hedelmäsalaatti', hinta: 4 },
+    { ruoka: 'Jäätelö', hinta: 5 },
+    { ruoka: 'Pulla', hinta: 3 },
+    { ruoka: 'Donitsi', hinta: 3 },
+  ];
+  this.juomat = [
+    { ruoka: 'Tee', hinta: 2 },
+    { ruoka: 'Kahvi', hinta: 3 },
+    { ruoka: 'Maito', hinta: 2 },
+    { ruoka: 'Mehu', hinta: 3 },
+  ];
   this.alkuruokaHinta = 4;
   this.paaruokaHinta = 6;
   this.jalkiruokaHinta = 4;
   this.juomaHinta = 3;
   this.paikkojenMaara = 15;
+  this.paikat; // Tähän muuttujaan paikkojen taulukko
 };
 
 /**
@@ -42,6 +58,14 @@ Ravintola.prototype.syoRavintolassa = function (asiakkaidenMaara) {
   if (!onTilaa) {
     return;
   }
+
+  // Varataan paikat ennen tilausten käsittelyä
+  const varausOnnistui = this.varaaPaikat(asiakkaidenMaara);
+  if (!varausOnnistui) {
+    console.log('Paikkoja ei voitu varata.');
+    return;
+  }
+
   const tilaukset = [];
 
   for (let i = 0; i < asiakkaidenMaara; i++) {
@@ -92,6 +116,46 @@ Ravintola.prototype.tarkistaPaikkojenMaara = function (asiakkaidenMaara) {
 };
 
 /**
+ * Luo Ravintolan paikat-muuttujaan uuden taulukon, jonka koko määräytyy paikkojenMaara-muuttujan mukaisesti,
+ * ja täyttää taulukon boolean arvolla false.
+ */
+Ravintola.prototype.generoiPaikat = function () {
+  this.paikat = new Array(this.paikkojenMaara).fill(false);
+};
+
+/**
+ * Varaa paikkoja ravintolasta.
+ * Tarkistaa että paikat-taulukko on olemassa, laskee vapaat paikat ja varaa ne jos mahdollista.
+ * Jos varauksenMaara:lle ei ole annettu arvoa, asettaa arvoksi 1.
+ * Palauttaa true jos varaus onnistui, muuten false.
+ *
+ * @param {number} varauksenMaara - Varattavien paikkojen määrä (oletus: 1)
+ * @return {boolean} Onnistuiko varaus
+ */
+Ravintola.prototype.varaaPaikat = function (varauksenMaara) {
+  if (!Array.isArray(this.paikat)) {
+    this.generoiPaikat();
+  }
+  if (varauksenMaara === undefined) {
+    varauksenMaara = 1;
+  }
+  const vapaitaPaikkoja = this.paikat.filter(
+    (paikka) => paikka === false
+  ).length;
+  if (vapaitaPaikkoja < varauksenMaara) {
+    return false;
+  }
+  let varattu = 0;
+  for (let i = 0; i < this.paikat.length && varattu < varauksenMaara; i++) {
+    if (this.paikat[i] === false) {
+      this.paikat[i] = true;
+      varattu++;
+    }
+  }
+  return true;
+};
+
+/**
  * Ottaa parametreina 3 boolean arvoa, joiden avulla määritellään mitä ruokia asiakas tilaa.
  * Jos parametrit eivät ole tyyppiä boolean, heitetään TypeError.
  *
@@ -120,39 +184,42 @@ Ravintola.prototype.tilaaAteria = function (
   }
 
   const ruoat = [];
-  let ruoka;
+  let summa = 0;
+  let ruokaObjekti;
 
   if (ottaaAlkuruoan) {
-    ruoka = this.palautaTaulukonSatunnainenArvo(this.alkuruoat);
-    console.log('Ottaisin alkuruoaksi: ' + ruoka);
-    ruoat.push(ruoka);
+    ruokaObjekti = this.palautaTaulukonSatunnainenArvo(this.alkuruoat);
+    console.log('Ottaisin alkuruoaksi: ' + ruokaObjekti.ruoka);
+    ruoat.push(ruokaObjekti.ruoka);
+    summa += ruokaObjekti.hinta;
   }
 
-  ruoka = this.palautaTaulukonSatunnainenArvo(this.paaruoat);
-  console.log('Ottaisin pääruoaksi: ' + ruoka);
-  ruoat.push(ruoka);
+  ruokaObjekti = this.palautaTaulukonSatunnainenArvo(this.paaruoat);
+  console.log('Ottaisin pääruoaksi: ' + ruokaObjekti.ruoka);
+  ruoat.push(ruokaObjekti.ruoka);
+  summa += ruokaObjekti.hinta;
 
   if (ottaaJalkiruoan) {
-    ruoka = this.palautaTaulukonSatunnainenArvo(this.jalkiruoat);
-    console.log('Ottaisin jälkiruoaksi: ' + ruoka);
-    ruoat.push(ruoka);
+    ruokaObjekti = this.palautaTaulukonSatunnainenArvo(this.jalkiruoat);
+    console.log('Ottaisin jälkiruoaksi: ' + ruokaObjekti.ruoka);
+    ruoat.push(ruokaObjekti.ruoka);
+    summa += ruokaObjekti.hinta;
   }
 
   if (ottaaJuoman) {
-    ruoka = this.palautaTaulukonSatunnainenArvo(this.juomat);
-    console.log('Ottaisin juomaksi: ' + ruoka);
-    ruoat.push(ruoka);
+    ruokaObjekti = this.palautaTaulukonSatunnainenArvo(this.juomat);
+    console.log('Ottaisin juomaksi: ' + ruokaObjekti.ruoka);
+    ruoat.push(ruokaObjekti.ruoka);
+    summa += ruokaObjekti.hinta;
   }
-
-  const summa = this.laskeLasku(ottaaAlkuruoan, ottaaJalkiruoan, ottaaJuoman);
 
   return { summa, ruoat };
 };
 
 /**
  * Palauttaa satunnaisen arvon annetusta taulukosta
- * @param {string[]} taulukko
- * @return {string}
+ * @param {Array} taulukko
+ * @return {*}
  */
 Ravintola.prototype.palautaTaulukonSatunnainenArvo = function (taulukko) {
   return taulukko[Math.floor(Math.random() * taulukko.length)];
@@ -206,5 +273,3 @@ Ravintola.prototype.laskeLasku = function (
 const ravintola = new Ravintola();
 
 module.exports = ravintola;
-
-
