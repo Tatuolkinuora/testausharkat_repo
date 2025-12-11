@@ -31,6 +31,7 @@ describe('My first Test', () => {
 */
 
 // Tehtävä 2
+/*
 // menee sivustolle https://tiko.jamk.fi/~imjar/fronttiper/esimteht/pizza_anim/
 describe('My first Test', () => {
   it('Tehtävä 1', () => {
@@ -57,3 +58,4 @@ describe('My first Test', () => {
     cy.contains('Hinta: 12.00 e').should('be.visible');
   });
 });
+*/
